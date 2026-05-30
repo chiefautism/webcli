@@ -16,6 +16,8 @@ contract Token implements IOCS01 {
 
   constructor(n: string, s: string, supply: int, dec: int) {
     require(len(n) > 0, "name empty")
+    require(supply >= 0, "supply cannot be negative")
+    require(dec >= 0, "decimals cannot be negative")
     self.name = n
     self.symbol = s
     self.total_supply = supply
@@ -38,6 +40,7 @@ contract Token implements IOCS01 {
 
   fn transfer(to: address, amt: int): bool {
     assert_address(to)
+    require(amt > 0, "amount must be positive")
     let bal = self.balances[caller]
     require(bal >= amt, "insufficient balance")
     self.balances[caller] = bal - amt
@@ -48,13 +51,17 @@ contract Token implements IOCS01 {
 
   fn grant(spender: address, amt: int): bool {
     assert_address(spender)
+    require(amt >= 0, "amount cannot be negative")
+    assert_address(spender)
     self.grants[caller][spender] = amt
     emit Grant(caller, spender, amt)
     return true
   }
 
   fn pull(from: address, to: address, amt: int): bool {
+    assert_address(from)
     assert_address(to)
+    require(amt > 0, "amount must be positive")
     let allowed = self.grants[from][caller]
     require(allowed >= amt, "not allowed")
     let bal = self.balances[from]
